@@ -13,6 +13,7 @@ Model name is converted to lowercase for the collection name:
 
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, Literal
+from datetime import datetime
 
 # Example schemas (replace with your own):
 
@@ -38,18 +39,24 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
 # --------------------------------------------------
 
 class Lead(BaseModel):
     """
-    Marketing leads from the landing page
+    Marketing leads and waitlist signups from the landing page
     Collection name: "lead"
     """
     name: str = Field(..., description="Full name of the person")
     company: str = Field(..., description="Company name")
     email: EmailStr = Field(..., description="Work email address")
-    interest: Literal["Demo", "Pilotkunde", "Partnerschaft", "Kostenlos testen"] = Field(
+    interest: Literal["Warteliste", "Demo", "Pilotkunde", "Partnerschaft", "Kostenlos testen"] = Field(
         ..., description="Interest category selected by the user"
     )
     message: Optional[str] = Field(None, description="Optional message or context")
+    purpose: Literal["Waitlist", "Lead"] = Field("Waitlist", description="Whether this is a waitlist signup or general lead")
+    consent: bool = Field(..., description="User consented to privacy policy (DSGVO)")
+
+class LeadStored(Lead):
+    status: Literal["pending", "confirmed"] = Field("pending", description="Double opt-in status")
+    confirm_token: Optional[str] = Field(None, description="Email confirmation token")
+    confirmed_at: Optional[datetime] = Field(None, description="Confirmation timestamp")
